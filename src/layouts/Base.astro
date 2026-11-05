@@ -218,6 +218,7 @@ const { title, og } = Astro.props;
 
       /* SCR-102: announcement */
 
+      [data-el="EL-108"],
       [data-el="EL-103"],
       [data-el="sns"],
       [data-el="EL-107"] {
@@ -357,8 +358,16 @@ const { title, og } = Astro.props;
         color: var(--muted);
       }
 
-      [data-el="EL-107"]:hover {
+      [data-el="EL-107"]:hover,
+      [data-el="EL-108"]:hover {
         color: var(--ink);
+      }
+
+      [data-el="EL-108"] {
+        display: block;
+        margin-bottom: 28px;
+        font-size: 14px;
+        color: var(--muted);
       }
 
       @media (max-width: 734px) {

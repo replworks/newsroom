@@ -172,6 +172,28 @@ test.describe("SCR-102 Announcement Detail", () => {
     );
   });
 
+  test("EL-108 top back link is shown above EL-103", async ({ page }) => {
+    await page.goto("/fixture-beta/v1.0.0/");
+    const top = await page.locator('[data-el="EL-108"]').boundingBox();
+    const content = await page.locator('[data-el="EL-103"]').boundingBox();
+    expect(top).not.toBeNull();
+    expect(content).not.toBeNull();
+    expect(top!.y + top!.height).toBeLessThanOrEqual(content!.y);
+    const bottom = await page.locator('[data-el="EL-107"]').boundingBox();
+    expect(bottom!.y).toBeGreaterThan(content!.y + content!.height);
+  });
+
+  test("EL-108 top back link opens SCR-101 for all services", async ({
+    page,
+  }) => {
+    await page.goto("/fixture-beta/v1.0.0/");
+    await page.locator('[data-el="EL-108"]').click();
+    await expect(page).toHaveURL("/");
+    await expect(page.locator('[data-el="EL-101"] [data-entry]')).toHaveCount(
+      20,
+    );
+  });
+
   test("EL-107 back link opens SCR-101 for all services", async ({ page }) => {
     await page.goto("/fixture-beta/v1.0.0/");
     await page.locator('[data-el="EL-107"]').click();
