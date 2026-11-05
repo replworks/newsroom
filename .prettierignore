@@ -4,3 +4,5 @@ dist-*/
 pnpm-lock.yaml
 test-results/
 playwright-report/
+# Public Copies are written by Newsroom Sync (shipcast C11), not formatted here.
+announcements/
