@@ -235,8 +235,11 @@ test("every internal link resolves under https://news.repl.net", async ({
     expect(response.status(), path).toBe(200);
     if (path.endsWith(".json")) continue;
     await page.goto(path);
+    // EL-104 and EL-105 point to X and LinkedIn by design (tests/e2e/share.spec.ts).
     const urls = await page
-      .locator("a[href], link[href], meta[property='og:url']")
+      .locator(
+        "a[href]:not([data-el='EL-104'], [data-el='EL-105']), link[href], meta[property='og:url']",
+      )
       .evaluateAll((nodes) =>
         nodes.map(
           (node) =>

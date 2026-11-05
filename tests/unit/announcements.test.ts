@@ -2,14 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import {
   PAGE_SIZE,
+  copyText,
   detailPath,
   feedEntries,
+  linkedInShareUrl,
   listPath,
   pageCount,
   pageItems,
   servicesOf,
   slugOf,
   sortNewestFirst,
+  xIntentUrl,
   type Announcement,
 } from "../../src/lib/announcements.ts";
 
@@ -98,4 +101,39 @@ test("feedEntries: newest first with exactly service, version, title, summary, d
       url: "https://news.repl.net/a/v1/",
     },
   ]);
+});
+
+test("xIntentUrl prefills the X composer with the text and the URL", () => {
+  const url = new URL(
+    xIntentUrl(
+      "[Svc] v1.0.0 — 새 기능 & 개선",
+      "https://news.repl.net/svc/v1.0.0/",
+    ),
+  );
+  assert.equal(url.origin + url.pathname, "https://x.com/intent/post");
+  assert.equal(url.searchParams.get("text"), "[Svc] v1.0.0 — 새 기능 & 개선");
+  assert.equal(
+    url.searchParams.get("url"),
+    "https://news.repl.net/svc/v1.0.0/",
+  );
+});
+
+test("linkedInShareUrl opens the LinkedIn share dialog for the URL", () => {
+  const url = new URL(linkedInShareUrl("https://news.repl.net/svc/v1.0.0/"));
+  assert.equal(
+    url.origin + url.pathname,
+    "https://www.linkedin.com/sharing/share-offsite/",
+  );
+  assert.equal(
+    url.searchParams.get("url"),
+    "https://news.repl.net/svc/v1.0.0/",
+  );
+  assert.deepEqual([...url.searchParams.keys()], ["url"]);
+});
+
+test("copyText is the SNS text followed by the announcement URL", () => {
+  assert.equal(
+    copyText("[Svc] v1.0.0 — 텍스트", "https://news.repl.net/svc/v1.0.0/"),
+    "[Svc] v1.0.0 — 텍스트 https://news.repl.net/svc/v1.0.0/",
+  );
 });
