@@ -2,7 +2,13 @@
 import type { GetStaticPaths } from "astro";
 import { render } from "astro:content";
 import Base from "../../../layouts/Base.astro";
-import { detailPath, slugOf } from "../../../lib/announcements.ts";
+import {
+  copyText,
+  detailPath,
+  linkedInShareUrl,
+  slugOf,
+  xIntentUrl,
+} from "../../../lib/announcements.ts";
 import { loadAnnouncements, toAnnouncement } from "../../../lib/content.ts";
 
 export const getStaticPaths = (async () => {
@@ -18,6 +24,13 @@ const { Content } = await render(entry);
 const base = import.meta.env.BASE_URL;
 const { title, service, version, date, corrected, summary } = entry.data;
 const url = new URL(detailPath(base, toAnnouncement(entry)), Astro.site).href;
+const snsX = entry.data.sns?.x ?? "";
+const snsLinkedIn = entry.data.sns?.linkedin ?? "";
+// EL-106: one copy button per non-empty SNS text (placeholder labels; copy is human-owned).
+const copies = [
+  { channel: "x", label: "Copy X text", text: snsX },
+  { channel: "linkedin", label: "Copy LinkedIn text", text: snsLinkedIn },
+].filter((copy) => copy.text !== "");
 ---
 
 <Base title={title} og={{ title, description: summary, url }}>
@@ -45,7 +58,53 @@ const url = new URL(detailPath(base, toAnnouncement(entry)), Astro.site).href;
       <Content />
     </div>
   </article>
+  {(snsX !== "" || snsLinkedIn !== "") && (
+    <div data-el="sns">
+      {snsX !== "" && (
+        <a
+          data-el="EL-104"
+          href={xIntentUrl(snsX, url)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Share on X
+        </a>
+      )}
+      {snsLinkedIn !== "" && (
+        <a
+          data-el="EL-105"
+          href={linkedInShareUrl(url)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Share on LinkedIn
+        </a>
+      )}
+      {copies.map((copy) => (
+        <button
+          type="button"
+          data-el="EL-106"
+          data-channel={copy.channel}
+          data-copy={copyText(copy.text, url)}
+        >
+          {copy.label}
+        </button>
+      ))}
+    </div>
+  )}
   <a data-el="EL-107" href={base}>
     All announcements
   </a>
 </Base>
+
+<script>
+  // EL-106: copy the SNS text and the announcement URL, then confirm on the button.
+  for (const button of document.querySelectorAll<HTMLButtonElement>(
+    '[data-el="EL-106"]',
+  )) {
+    button.addEventListener("click", async () => {
+      await navigator.clipboard.writeText(button.dataset.copy ?? "");
+      button.textContent = "Copied";
+    });
+  }
+</script>

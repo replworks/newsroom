@@ -18,7 +18,7 @@ export default defineConfig({
   projects: [
     {
       name: "populated",
-      testMatch: "populated.spec.ts",
+      testMatch: ["populated.spec.ts", "share.spec.ts"],
       use: { baseURL: "http://localhost:4391" },
     },
     {

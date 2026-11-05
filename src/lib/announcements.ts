@@ -85,3 +85,18 @@ export function feedEntries(
     url: new URL(detailPath(base, item), site).href,
   }));
 }
+
+/** X web intent (PRODUCT_SPEC External Systems): a post composer prefilled with text and URL. */
+export function xIntentUrl(text: string, url: string): string {
+  return `https://x.com/intent/post?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+}
+
+/** LinkedIn share URL (PRODUCT_SPEC External Systems): a share dialog for the given URL. */
+export function linkedInShareUrl(url: string): string {
+  return `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+}
+
+/** EL-106: the SNS text followed by the announcement URL. */
+export function copyText(text: string, url: string): string {
+  return `${text} ${url}`;
+}
