@@ -1,0 +1,25 @@
+---
+import type { GetStaticPaths } from "astro";
+import AnnouncementList from "../../components/AnnouncementList.astro";
+import { pageCount, pageItems, servicesOf } from "../../lib/announcements.ts";
+import { loadAnnouncements, toAnnouncement } from "../../lib/content.ts";
+
+export const getStaticPaths = (async () => {
+  const all = (await loadAnnouncements()).map(toAnnouncement);
+  const pages = pageCount(all.length);
+  return Array.from({ length: pages - 1 }, (_, index) => ({
+    params: { page: String(index + 2) },
+  }));
+}) satisfies GetStaticPaths;
+
+const page = Number(Astro.params.page);
+const all = (await loadAnnouncements()).map(toAnnouncement);
+---
+
+<AnnouncementList
+  services={servicesOf(all)}
+  slug={undefined}
+  items={pageItems(all, page)}
+  page={page}
+  pages={pageCount(all.length)}
+/>

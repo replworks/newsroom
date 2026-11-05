@@ -1,0 +1,51 @@
+---
+import type { GetStaticPaths } from "astro";
+import { render } from "astro:content";
+import Base from "../../../layouts/Base.astro";
+import { detailPath, slugOf } from "../../../lib/announcements.ts";
+import { loadAnnouncements, toAnnouncement } from "../../../lib/content.ts";
+
+export const getStaticPaths = (async () => {
+  const entries = await loadAnnouncements();
+  return entries.map((entry) => ({
+    params: { slug: slugOf(entry), version: entry.data.version },
+    props: { entry },
+  }));
+}) satisfies GetStaticPaths;
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const base = import.meta.env.BASE_URL;
+const { title, service, version, date, corrected, summary } = entry.data;
+const url = new URL(detailPath(base, toAnnouncement(entry)), Astro.site).href;
+---
+
+<Base title={title} og={{ title, description: summary, url }}>
+  <article data-el="EL-103">
+    <h1 data-field="title">{title}</h1>
+    <p>
+      <span data-field="service">{service}</span>
+      <span data-field="version">{version}</span>
+    </p>
+    <p>
+      <time data-field="date" datetime={date}>
+        {date.slice(0, 10)}
+      </time>
+      {corrected && (
+        <span>
+          Corrected:{" "}
+          <time data-field="corrected" datetime={corrected}>
+            {corrected}
+          </time>
+        </span>
+      )}
+    </p>
+    <p data-field="summary">{summary}</p>
+    <div data-field="body">
+      <Content />
+    </div>
+  </article>
+  <a data-el="EL-107" href={base}>
+    All announcements
+  </a>
+</Base>

@@ -1,0 +1,30 @@
+---
+import type { GetStaticPaths } from "astro";
+import AnnouncementList from "../../components/AnnouncementList.astro";
+import {
+  pageCount,
+  pageItems,
+  servicesOf,
+  slugOf,
+} from "../../lib/announcements.ts";
+import { loadAnnouncements, toAnnouncement } from "../../lib/content.ts";
+
+export const getStaticPaths = (async () => {
+  const all = (await loadAnnouncements()).map(toAnnouncement);
+  return servicesOf(all).map((service) => ({
+    params: { slug: service.slug },
+  }));
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const all = (await loadAnnouncements()).map(toAnnouncement);
+const items = all.filter((item) => slugOf(item) === slug);
+---
+
+<AnnouncementList
+  services={servicesOf(all)}
+  slug={slug}
+  items={pageItems(items, 1)}
+  page={1}
+  pages={pageCount(items.length)}
+/>

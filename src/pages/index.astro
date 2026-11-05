@@ -1,0 +1,15 @@
+---
+import AnnouncementList from "../components/AnnouncementList.astro";
+import { pageCount, pageItems, servicesOf } from "../lib/announcements.ts";
+import { loadAnnouncements, toAnnouncement } from "../lib/content.ts";
+
+const all = (await loadAnnouncements()).map(toAnnouncement);
+---
+
+<AnnouncementList
+  services={servicesOf(all)}
+  slug={undefined}
+  items={pageItems(all, 1)}
+  page={1}
+  pages={pageCount(all.length)}
+/>

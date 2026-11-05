@@ -1,0 +1,34 @@
+---
+import type { GetStaticPaths } from "astro";
+import AnnouncementList from "../../../components/AnnouncementList.astro";
+import {
+  pageCount,
+  pageItems,
+  servicesOf,
+  slugOf,
+} from "../../../lib/announcements.ts";
+import { loadAnnouncements, toAnnouncement } from "../../../lib/content.ts";
+
+export const getStaticPaths = (async () => {
+  const all = (await loadAnnouncements()).map(toAnnouncement);
+  return servicesOf(all).flatMap((service) => {
+    const count = all.filter((item) => slugOf(item) === service.slug).length;
+    return Array.from({ length: pageCount(count) - 1 }, (_, index) => ({
+      params: { slug: service.slug, page: String(index + 2) },
+    }));
+  });
+}) satisfies GetStaticPaths;
+
+const { slug } = Astro.params;
+const page = Number(Astro.params.page);
+const all = (await loadAnnouncements()).map(toAnnouncement);
+const items = all.filter((item) => slugOf(item) === slug);
+---
+
+<AnnouncementList
+  services={servicesOf(all)}
+  slug={slug}
+  items={pageItems(items, page)}
+  page={page}
+  pages={pageCount(items.length)}
+/>
