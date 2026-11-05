@@ -1,0 +1,30 @@
+---
+interface Props {
+  title: string;
+  og?: { title: string; description: string; url: string };
+}
+
+const { title, og } = Astro.props;
+---
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {og && (
+      <>
+        <meta name="description" content={og.description} />
+        <meta property="og:type" content="article" />
+        <meta property="og:title" content={og.title} />
+        <meta property="og:description" content={og.description} />
+        <meta property="og:url" content={og.url} />
+        <link rel="canonical" href={og.url} />
+      </>
+    )}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

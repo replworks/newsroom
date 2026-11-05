@@ -1,0 +1,90 @@
+---
+import {
+  detailPath,
+  listPath,
+  type Announcement,
+  type Service,
+} from "../lib/announcements.ts";
+import Base from "../layouts/Base.astro";
+
+interface Props {
+  services: Service[];
+  /** Undefined for all services. */
+  slug: string | undefined;
+  items: Announcement[];
+  page: number;
+  pages: number;
+}
+
+const { services, slug, items, page, pages } = Astro.props;
+const base = import.meta.env.BASE_URL;
+const pageNumbers = Array.from({ length: pages }, (_, index) => index + 1);
+const heading =
+  slug === undefined
+    ? "Newsroom"
+    : (services.find((service) => service.slug === slug)?.name ?? slug);
+---
+
+<Base title={heading}>
+  <h1>{heading}</h1>
+
+  <nav data-el="EL-100" aria-label="Service filter">
+    <ul>
+      <li>
+        <a
+          href={listPath(base, undefined, 1)}
+          aria-current={slug === undefined ? "page" : undefined}
+        >
+          All
+        </a>
+      </li>
+      {services.map((service) => (
+        <li>
+          <a
+            href={listPath(base, service.slug, 1)}
+            aria-current={service.slug === slug ? "page" : undefined}
+          >
+            {service.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </nav>
+
+  {items.length === 0 ? (
+    <p data-el="EL-101-empty">No announcements.</p>
+  ) : (
+    <ol data-el="EL-101">
+      {items.map((item) => (
+        <li data-entry>
+          <a href={detailPath(base, item)}>
+            <span data-field="service">{item.service}</span>
+            <span data-field="version">{item.version}</span>
+            <strong data-field="title">{item.title}</strong>
+          </a>
+          <p data-field="summary">{item.summary}</p>
+          <time data-field="date" datetime={item.date}>
+            {item.date.slice(0, 10)}
+          </time>
+        </li>
+      ))}
+    </ol>
+  )}
+
+  {pages > 1 && (
+    <nav data-el="EL-102" aria-label="Pagination">
+      <ol>
+        {pageNumbers.map((number) => (
+          <li>
+            <a
+              href={listPath(base, slug, number)}
+              aria-current={number === page ? "page" : undefined}
+            >
+              {number}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )}
+</Base>
