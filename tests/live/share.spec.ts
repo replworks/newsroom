@@ -1,4 +1,10 @@
-import { expect, test, type BrowserContext, type Page } from "@playwright/test";
+import {
+  expect,
+  test,
+  type BrowserContext,
+  type Page,
+  type Request,
+} from "@playwright/test";
 
 // SCR-102 EL-104, EL-105, EL-106 and AC-013 against the published newsroom site.
 // X and LinkedIn answer automated browsers with HTTP 403 (bot protection), so the new tab is
@@ -38,16 +44,25 @@ async function openedUrl(
   page: Page,
   selector: string,
 ): Promise<URL> {
+  const requests: Request[] = [];
+  const record = (request: Request) => {
+    // The new tab is created before its frame exists; tell it apart by leaving the site.
+    if (
+      request.isNavigationRequest() &&
+      new URL(request.url()).origin !== new URL(page.url()).origin
+    )
+      requests.push(request);
+  };
+  context.on("request", record);
   const [tab] = await Promise.all([
     context.waitForEvent("page"),
     page.locator(selector).click(),
   ]);
-  const request = await tab.waitForEvent("request", (r) =>
-    r.isNavigationRequest(),
-  );
-  const response = await request.response();
+  await expect.poll(() => requests.length).toBeGreaterThan(0);
+  context.off("request", record);
+  const request = requests[0]!;
   // The boundary answered (any status, including its bot protection).
-  expect(response).not.toBeNull();
+  expect(await request.response()).not.toBeNull();
   await tab.close();
   return new URL(request.url());
 }
